@@ -250,7 +250,7 @@ function setBackground() {
     var top = new createjs.Sprite(spriteSheet, "top");
     top.scale = (stage.canvas.width * 2.7 / 3) / top.getBounds().width;
     top.x = (stage.canvas.width - top.getBounds().width * top.scale) / 2
-    top.y = stage.canvas.height / 17
+    top.y = stage.canvas.height / 30
 
     var best = new createjs.Sprite(spriteSheet, "best");
     best.scale = (stage.canvas.width * 2.7 / 3) / top.getBounds().width;
@@ -259,7 +259,7 @@ function setBackground() {
 
 
     var txtBesttemp = new createjs.Text(game.best, "30px Impact", "#f7eb6a");
-    txtBesttemp.scale = top.scale ;
+    txtBesttemp.scale = top.scale;
     txtBesttemp.x = best.x + (best.getBounds().width * best.scale - txtBesttemp.getMeasuredWidth() * txtBesttemp.scale) / 2
     txtBesttemp.y = best.y + (best.getBounds().height * best.scale - txtBesttemp.getMeasuredHeight() * txtBesttemp.scale) / 3
 
@@ -298,12 +298,13 @@ function setBackground() {
     var grid = new createjs.Sprite(spriteSheet, "grid");
     grid.scale = (stage.canvas.width * 2.7 / 3) / grid.getBounds().width;
     grid.x = (stage.canvas.width - grid.getBounds().width * grid.scale) / 2
-    grid.y = top.y + top.getBounds().height * top.scale * 1.5
+    grid.y = top.y + top.getBounds().height * top.scale * 1.3
 
     var bot = new createjs.Sprite(spriteSheet, "bot");
     bot.scale = (stage.canvas.width * 2.7 / 3) / bot.getBounds().width;
+    bot.scaleY = bot.scale * 1.5;
     bot.x = (stage.canvas.width - bot.getBounds().width * bot.scale) / 2
-    bot.y = grid.y + grid.getBounds().height * grid.scale + top.getBounds().height * top.scale * 0.5
+    bot.y = grid.y + grid.getBounds().height * grid.scale + top.getBounds().height * top.scale * 0.3
 
     var block_cyan = new createjs.Sprite(spriteSheet, "block_cyan");
 
@@ -316,8 +317,8 @@ function setBackground() {
 
 
     storageBlock = {
-        height: bot.getBounds().height * bot.scale,
-        avgY: bot.y + bot.getBounds().height * bot.scale / 2,
+        height: bot.getBounds().height * bot.scaleY,
+        avgY: bot.y + bot.getBounds().height * bot.scaleY / 2,
         minX: bot.x + stage.canvas.width / 10,
         maxX: bot.x + bot.getBounds().width * bot.scale - stage.canvas.width / 10
     };
@@ -451,6 +452,16 @@ function onMouseDown(evt) {
     var location = currentMouse(evt);
     groupCurr = evt.currentTarget.myParam;
     distanceGTH = getDistance(location, { x: location.x, y: game.map[7][0].y })
+
+    var target = blockUse[groupCurr].target;
+    var scaleItem = blockUse[groupCurr].target.children[0].scale;
+    var newScaleGroup = game.scale / scaleItem;
+    var widthGrBlock = blockUse[groupCurr].width * storageBlock.height / 5.5 * target.scale
+    var heightGrBlock = (blockUse[groupCurr].height + 2) * storageBlock.height / 5.5 * target.scale
+    grWHCrr = { width: widthGrBlock, height: heightGrBlock }
+    target.x = location.x - grWHCrr.width / 2;
+    target.y = location.y - grWHCrr.height;
+    target.scale = newScaleGroup
 }
 
 // Free
@@ -476,21 +487,23 @@ function onPressMove(evt) {
         var location = currentMouse(evt);
         var target = blockUse[groupCurr].target;
         var widthGrBlock = blockUse[groupCurr].width * storageBlock.height / 5.5 * target.scale
-        var heightGrBlock = blockUse[groupCurr].height * storageBlock.height / 5.5 * target.scale
+        var heightGrBlock = (blockUse[groupCurr].height + 2) * storageBlock.height / 5.5 * target.scale
         grWHCrr = { width: widthGrBlock, height: heightGrBlock }
         target.x = location.x - grWHCrr.width / 2;
-        target.y = location.y - grWHCrr.height / 2;
+        target.y = location.y - grWHCrr.height;
         var scaleItem = blockUse[groupCurr].target.children[0].scale;
         var newScaleGroup = game.scale / scaleItem;
-        var percent
-        if (location.y > game.map[7][0].y + game.block.width) {
-            var distance = location.y - (game.map[7][0].y + game.block.width);
-            percent = distance / distanceGTH - 1;
-        }
-        if (newScaleGroup * Math.abs(percent) > blockUse[groupCurr].scale) {
-            target.scale = newScaleGroup * Math.abs(percent);
-        }
-        renderHint({ x: location.x - grWHCrr.width / 2, y: location.y - grWHCrr.height / 2 })
+        target.scale = newScaleGroup
+        // var percent
+        // if (target.y > game.map[7][0].y + game.block.width) {
+        //     var distance = target.y - (game.map[7][0].y + game.block.width);
+        //     percent = distance / distanceGTH - 1;
+        //     console.log(percent);
+        // }
+        // if (newScaleGroup * Math.abs(percent) > blockUse[groupCurr].scale) {
+        //     target.scale = newScaleGroup * Math.abs(percent);
+        // }
+        renderHint({ x: location.x - grWHCrr.width / 2, y: location.y - grWHCrr.height })
     }
 }
 function onMouseUp(evt) {
@@ -612,7 +625,7 @@ function removeBlock() {
 }
 function blockDie(item) {
     var block = new createjs.Sprite(spriteSheet, convertAnimations(item.color));
-    block.scale = game.scale*1.3;
+    block.scale = game.scale * 1.3;
     block.x = item.x;
     block.y = item.y;
     stage.addChild(block);
