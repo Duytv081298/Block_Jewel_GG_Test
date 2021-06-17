@@ -1,6 +1,5 @@
 
 var isMobile = detectMobile();
-console.log(isMobile);
 
 var width = window.innerWidth
     || document.documentElement.clientWidth
@@ -19,9 +18,10 @@ var game = {
     best: 1098,
     scores: 0
 };
+var lowerBlock = false;
 var spriteSheet, setTimeEnd;
 var blockUse = [], storageBlock;
-var containerMain = new createjs.Container(), containerNew = [];
+var containerMain = new createjs.Container(), containerNew = [], blockTempNew = [];
 var defaultX = 0, defaultY = 0;
 var groupCurr = 0, grWHCrr = {};
 var indexHint = {}, hintCurr = 0, groupHint = new createjs.Container(), distanceGTH = 0, hintFree = [];
@@ -226,8 +226,8 @@ function setMap(map) {
                 block.x = xb + defaultX
                 block.y = y + defaultY
                 containerMain.addChild(block);
-                arr.push({ x: block.x, y: block.y, existing: true, block: block, color: null });
-            } else arr.push({ x: xb + defaultX, y: y + defaultY, existing: false, block: null, color: null });
+                arr.push({ x: block.x, y: block.y, existing: true, block: block, color: null, colorTemp: null, blockTemp: null });
+            } else arr.push({ x: xb + defaultX, y: y + defaultY, existing: false, block: null, color: null, colorTemp: null, blockTemp: null });
 
         }
         locationArr.push(arr);
@@ -392,7 +392,6 @@ function renderGroupBlock(blockArr, color, index) {
     addEventFree(containerBlockUse, blockUse.length - 1)
 }
 function addHand() {
-    console.log(blockUse[1]);
     hand_tut.x = blockUse[1].x - hand_tut.getBounds().width * hand_tut.scale * 0.5;
     hand_tut.y = blockUse[1].y + (blockUse[1].height * storageBlock.height / 5.5) / 2;
     hand_tut.scale = (stage.canvas.width / 8) / hand_tut.getBounds().width;
@@ -514,6 +513,7 @@ function onMouseUp(evt) {
         containerNew = []
         var target = blockUse[groupCurr].target;
         if (hintFree.length != 0) {
+            lowerBlock = true;
             removeHand()
             game.scores += hintFree.length * 5
             updateScore()
@@ -529,7 +529,7 @@ function onMouseUp(evt) {
                 newblock.y = hint.y
                 containerMain.addChild(newblock);
                 containerNew.push({ x: hintFree[i].x, y: hintFree[i].y })
-                game.map[hintFree[i].y][hintFree[i].x] = { x: item.x, y: item.y, existing: true, block: newblock, color: color }
+                game.map[hintFree[i].y][hintFree[i].x] = { x: item.x, y: item.y, existing: true, block: newblock, color: color, colorTemp: item.colorTemp, blockTemp: item.blockTemp }
             }
             removeBlock();
             blockUse[groupCurr].target.removeAllChildren()
@@ -546,10 +546,36 @@ function onMouseUp(evt) {
         pressUp = false
     }
 }
+
+function addBlock(index) {
+    const color = blockUse[groupCurr].color;
+    var colorstr = convertBlock(color);
+    var block = new createjs.Sprite(spriteSheet, colorstr);
+    block.scale = game.scale;
+    var item = game.map[index.y][index.x]
+    block.x = item.x
+    block.y = item.y
+    containerMain.addChild(block);
+    blockTempNew.push({ x: index.x, y: index.y })
+    game.map[index.y][index.x] = { x: item.x, y: item.y, existing: true, block: item.block, color: item.color, colorTemp: color, blockTemp: block }
+}
+
+function removeBlockTemp() {
+    if (blockTempNew) {
+        for (let i = 0; i < blockTempNew.length; i++) {
+            const index = blockTempNew[i];
+            var item = game.map[index.y][index.x]
+            containerMain.removeChild(item.blockTemp)
+        }
+        blockTempNew = []
+    }
+}
 function renderHint(location) {
     var array = [];
     var render = true
     removeHint()
+    removeBlockTemp()
+    lowerBlock = false
     var hint = new createjs.Sprite(spriteSheet, "square_hint");
     hint.scale = game.scale;
     if (location.x >= game.map[0][0].x - game.block.width / 2 &&
@@ -576,18 +602,37 @@ function renderHint(location) {
         for (let i = 0; i < array.length; i++) {
             const index = array[i];
             var item = game.map[index.y][index.x]
+            game.map[index.y][index.x] = { x: item.x, y: item.y, existing: true, block: item.block, color: item.color, colorTemp: item.colorTemp, blockTemp: item.blockTemp }
             var newHint = hint.clone()
             newHint.x = item.x;
             newHint.y = item.y;
             containerMain.addChild(newHint);
             hintFree.push({ x: index.x, y: index.y, hint: newHint })
         }
+        var removeArray = checkRC()
+        console.log(removeArray.lengthRemove);
+        if (removeArray.lengthRemove) {
+            console.log(11111111111);
+            console.log(blockTempNew);
+            removeArray.arr.forEach(index => {
+                addBlock(index)
+            });
+        } else {
+            console.log('2222222222');
+            removeBlockTemp()
+        }
     }
 }
 function removeHint() {
     for (let i = 0; i < hintFree.length; i++) {
+        if (!lowerBlock) {
+            var hintt = hintFree[i]
+            var item = game.map[hintt.y][hintt.x]
+            game.map[hintt.y][hintt.x] = { x: item.x, y: item.y, existing: false, block: item.block, color: item.color, colorTemp: item.colorTemp, blockTemp: item.blockTemp }
+        }
         const hint = hintFree[i].hint;
         containerMain.removeChild(hint)
+
     }
     hintFree = [];
 }
@@ -599,12 +644,49 @@ function createGroupBlockFree() {
     }
     if (render) {
         blockUse = []
-        for (let i = 0; i < 3; i++) {
-            var block = blockFree[Math.floor(Math.random() * blockFree.length)]
+        var listBlock = randomIndex()
+        for (let i = 0; i < listBlock.length; i++) {
+            const block = listBlock[i];
             var color = Math.floor(Math.random() * 6)
             renderGroupBlock(block, color, i);
         }
+
     }
+}
+function randomIndex() {
+    var pass = true;
+    var listIndex = [];
+    var index;
+    for (let i = 0; i < 3; i++) {
+        index = Math.floor(Math.random() * blockFree.length)
+        if (listIndex.indexOf(index) != -1) {
+            if (pass) {
+                while (listIndex.indexOf(index) != -1) {
+                    index = Math.floor(Math.random() * blockFree.length)
+                }
+            } else {
+                while (listIndex.indexOf(index) != -1 && getCol(blockFree[index]) >= 3) {
+                    index = Math.floor(Math.random() * blockFree.length)
+                }
+            }
+        } else {
+            var a = getCol(blockFree[index])
+            if (!pass) while (a >= 3) {
+                index = Math.floor(Math.random() * blockFree.length)
+                a = getCol(blockFree[index])
+            }
+        }
+        if (getCol(blockFree[index]) > 2) pass = false
+        listIndex.push(blockFree[index])
+    }
+    return listIndex
+}
+function getCol(grBlock) {
+    var maxCol = grBlock[0].length
+    grBlock.forEach(row => {
+        if (maxCol < row.length) maxCol = row.length
+    });
+    return maxCol
 }
 
 //Collision
@@ -614,14 +696,16 @@ function removeBlock() {
 
     game.scores += hintFree.length * 10
     updateScore()
-    removeHint();
 
+    removeHint()
     for (let i = 0; i < removeArr.length; i++) {
         const index = removeArr[i];
         const item = game.map[index.y][index.x]
         blockDie(item)
         containerMain.removeChild(item.block);
-        game.map[index.y][index.x] = { x: item.x, y: item.y, existing: false, block: null, color: null }
+
+        containerMain.removeChild(item.blockTemp)
+        game.map[index.y][index.x] = { x: item.x, y: item.y, existing: false, block: null, color: null, colorTemp: null, blockTemp: null }
     }
 }
 function blockDie(item) {
@@ -631,10 +715,7 @@ function blockDie(item) {
     block.y = item.y + game.block.height / 2 - block.getBounds().height * block.scale;
     stage.addChild(block);
     block.on("animationend", handleComplete);
-    var i = 1;
     function handleComplete() {
-        i++
-        console.log(i);
         stage.removeChild(this);
         block = null;
     }
