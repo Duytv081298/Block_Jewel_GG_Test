@@ -494,15 +494,6 @@ function onPressMove(evt) {
         var scaleItem = blockUse[groupCurr].target.children[0].scale;
         var newScaleGroup = game.scale / scaleItem;
         target.scale = newScaleGroup
-        // var percent
-        // if (target.y > game.map[7][0].y + game.block.width) {
-        //     var distance = target.y - (game.map[7][0].y + game.block.width);
-        //     percent = distance / distanceGTH - 1;
-        //     console.log(percent);
-        // }
-        // if (newScaleGroup * Math.abs(percent) > blockUse[groupCurr].scale) {
-        //     target.scale = newScaleGroup * Math.abs(percent);
-        // }
         renderHint({ x: location.x - grWHCrr.width / 2, y: location.y - grWHCrr.height })
     }
 }
@@ -609,16 +600,12 @@ function renderHint(location) {
             containerMain.addChild(newHint);
             hintFree.push({ x: index.x, y: index.y, hint: newHint })
         }
-        var removeArray = checkRC(blockTempNew)
-        console.log(removeArray.lengthRemove);
+        var removeArray = checkRC(hintFree)
         if (removeArray.lengthRemove) {
-            console.log(11111111111);
-            console.log(blockTempNew);
             removeArray.arr.forEach(index => {
                 addBlock(index)
             });
         } else {
-            console.log('2222222222');
             removeBlockTemp()
         }
     }
@@ -722,6 +709,7 @@ function blockDie(item) {
 }
 // check row and column
 function checkRC(arr) {
+    console.log(arr);
     var checkX = [];
     var checkY = [];
     for (let i = 0; i < arr.length; i++) {
