@@ -609,7 +609,7 @@ function renderHint(location) {
             containerMain.addChild(newHint);
             hintFree.push({ x: index.x, y: index.y, hint: newHint })
         }
-        var removeArray = checkRC()
+        var removeArray = checkRC(blockTempNew)
         console.log(removeArray.lengthRemove);
         if (removeArray.lengthRemove) {
             console.log(11111111111);
@@ -691,7 +691,7 @@ function getCol(grBlock) {
 
 //Collision
 function removeBlock() {
-    const removeArray = checkRC()
+    const removeArray = checkRC(containerNew)
     var removeArr = removeArray.arr
 
     game.scores += hintFree.length * 10
@@ -721,11 +721,11 @@ function blockDie(item) {
     }
 }
 // check row and column
-function checkRC() {
+function checkRC(arr) {
     var checkX = [];
     var checkY = [];
-    for (let i = 0; i < containerNew.length; i++) {
-        var item = containerNew[i];
+    for (let i = 0; i < arr.length; i++) {
+        var item = arr[i];
         if (checkX.indexOf(item.x) < 0) checkX.push(item.x);
         if (checkY.indexOf(item.y) < 0) checkY.push(item.y);
     }
