@@ -88,7 +88,7 @@ function setAnimation() {
     spriteSheet = new createjs.SpriteSheet({
         images: [queue.getResult("full_block")],
         framerate: 24,
-        frames:[
+        frames: [
             [1, 1, 388, 392, 0, 0, 0],
             [391, 1, 100, 31, 0, 0, 0],
             [391, 34, 100, 31, 0, 0, 0],
@@ -213,7 +213,7 @@ function setAnimation() {
             [223, 1346, 19, 17, 0, -31, -68],
             [223, 1365, 19, 17, 0, -31, -68]
         ],
-        
+
         "animations": {
             "grid": { "frames": [0] },
             "btn_continue": { "frames": [1] },
@@ -386,10 +386,9 @@ function setBackground() {
                 x: (stage.canvas.width - ((stage.canvas.width / 5) / install_now.getBounds().width) * install_now.getBounds().width) / 2,
                 y: install_nowy - (stage.canvas.width / 5 - stage.canvas.width / 8) / 10,
             },
-            400,
-            createjs.Ease.linear
+            500, createjs.Ease.linear
         )
-        .to({ scale: install_nowscale, x: install_nowx, y: install_nowy }, 300, createjs.Ease.linear);
+        .to({ scale: install_nowscale, x: install_nowx, y: install_nowy }, 500, createjs.Ease.linear);
     install_now.addEventListener("click", () => { getLinkInstall() }, false);
 }
 
@@ -739,7 +738,7 @@ function removeBlock() {
 }
 function blockDie(item) {
     var block = new createjs.Sprite(spriteSheet, convertAnimations(blockUse[groupCurr].color));
-    block.scale = game.scale*1.2;
+    block.scale = game.scale * 1.2;
     block.x = item.x + game.block.width / 2 - block.getBounds().width * block.scale;
     block.y = item.y + game.block.height / 2 - block.getBounds().height * block.scale;
     stage.addChild(block);
