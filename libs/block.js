@@ -709,7 +709,7 @@ function removeBlock() {
     }
 }
 function blockDie(item) {
-    var block = new createjs.Sprite(spriteSheet, convertAnimations(item.color));
+    var block = new createjs.Sprite(spriteSheet, convertAnimations(blockUse[groupCurr].color));
     block.scale = game.scale;
     block.x = item.x + game.block.width / 2 - block.getBounds().width * block.scale;
     block.y = item.y + game.block.height / 2 - block.getBounds().height * block.scale;
