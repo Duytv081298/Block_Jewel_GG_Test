@@ -709,7 +709,6 @@ function blockDie(item) {
 }
 // check row and column
 function checkRC(arr) {
-    console.log(arr);
     var checkX = [];
     var checkY = [];
     for (let i = 0; i < arr.length; i++) {
