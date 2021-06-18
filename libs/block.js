@@ -25,7 +25,7 @@ var containerMain = new createjs.Container(), containerNew = [], blockTempNew = 
 var defaultX = 0, defaultY = 0;
 var groupCurr = 0, grWHCrr = {};
 var indexHint = {}, hintCurr = 0, groupHint = new createjs.Container(), distanceGTH = 0, hintFree = [];
-var hand_tut, scoresTemp = 0, install_now;
+var hand_tut, scoresTemp = 0, install_now, removeArray= [];
 var txtBest, txtScores;
 const blockFree = [
     [[0, 1], [1, 1], [0, 1]],
@@ -641,7 +641,7 @@ function renderHint(location) {
             containerMain.addChild(newHint);
             hintFree.push({ x: index.x, y: index.y, hint: newHint })
         }
-        var removeArray = checkRC(hintFree)
+        removeArray = checkRC(hintFree)
         if (removeArray.lengthRemove) {
             removeArray.arr.forEach(index => {
                 addBlock(index)
@@ -719,7 +719,6 @@ function getCol(grBlock) {
 
 //Collision
 function removeBlock() {
-    const removeArray = checkRC(containerNew)
     var removeArr = removeArray.arr
 
     game.scores += hintFree.length * 10
